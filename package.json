@@ -1,0 +1,78 @@
+{
+  "name": "decloud-consumer",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./public/electron.js",
+  "author": "John Doe",
+  "homepage": "./",
+  "description": "A fantastic ele",
+  "dependencies": {
+    "@chakra-ui/icons": "^1.1.7",
+    "@chakra-ui/react": "^1.8.6",
+    "@emotion/react": "^11.8.2",
+    "@emotion/styled": "^11.8.1",
+    "@testing-library/jest-dom": "^5.16.2",
+    "@testing-library/react": "^12.1.4",
+    "@testing-library/user-event": "^13.5.0",
+    "@walletconnect/client": "^1.7.5",
+    "@walletconnect/node": "^1.0.0",
+    "@walletconnect/qrcode-modal": "^1.7.5",
+    "@walletconnect/web3-provider": "^1.7.5",
+    "defaults-deep": "^0.2.4",
+    "drag-drop": "^7.2.0",
+    "ethers": "^5.6.2",
+    "framer-motion": "^3.10.6",
+    "hidefile": "^3.0.0",
+    "it-pipe": "^1.1.0",
+    "libp2p": "^0.36.2",
+    "libp2p-gossipsub": "^0.13.0",
+    "libp2p-mdns": "^0.18.0",
+    "libp2p-mplex": "^0.10.7",
+    "libp2p-noise": "^4.0.0",
+    "libp2p-tcp": "^0.17.2",
+    "multiaddr": "^10.0.1",
+    "peer-id": "^0.16.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "^4.0.3",
+    "web-vitals": "^2.1.4",
+    "web3": "^1.7.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "copy-contract": "cp ../truffle/build/contracts/DeCloudFiles.json ./src/res/contracts",
+    "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon --disable-gpu --disable-software-rasterizer .\"",
+    "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
+    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
+    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/electron.js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^17.1.2",
+    "electron-builder": "^22.14.13",
+    "electronmon": "^2.0.2",
+    "wait-on": "^6.0.1"
+  }
+}
