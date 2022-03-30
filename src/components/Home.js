@@ -27,8 +27,8 @@ const Home = ({ ethers }) => {
         isClosable: true,
       });
 
-      console.log(fileData);
-      // addFile(fileData);
+      // console.log(fileData);
+      addFile(fileData);
     });
   }, [toast, addFile]);
 

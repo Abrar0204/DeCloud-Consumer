@@ -40,7 +40,7 @@ function App() {
           >
             Connect to Metamask
           </Button>
-          <Alert status="info" width="30%" marginTop="5">
+          <Alert status="info" width="30%" minW="460px" marginTop="5">
             <AlertIcon />
             Link your Metamask account to start uploading files
           </Alert>
