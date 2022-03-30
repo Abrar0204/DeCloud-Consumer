@@ -81,41 +81,13 @@ const startNode = async (win) => {
     for await (let peer of node.peerStore.getPeers()) {
       try {
         let peerAccountNumber = "";
-        const { stream: sinkFileHashStream } = await node.dialProtocol(
-          peer.id,
-          "/send-meta-data/1.0.0"
-        );
 
-        await pipe(
-          [
-            JSON.stringify({
-              type: "filename",
-              data: fileHash,
-            }),
-          ],
-          sinkFileHashStream,
-          async function (source) {
-            for await (const d of source) {
-              peerAccountNumber = d.toString().trim();
-              console.log(
-                "[INFO] remote peer account number: ",
-                peerAccountNumber
-              );
-            }
-          }
-        );
-
-        sinkFileHashStream.close();
-
-        const { stream: sinkFileStream } = await node.dialProtocol(
-          peer.id,
-          "/send-file/1.0.0"
-        );
+        const { stream } = await node.dialProtocol(peer.id, "/send-file/1.0.0");
 
         await pipe(
           fileStream.pipe(cipher).pipe(appendInitVectAndFileHash),
           // fileStream,
-          sinkFileStream
+          stream
         );
 
         const [fileName, fileType] = getFileNameAndTypeFromFilePath(filepath);
@@ -137,7 +109,7 @@ const startNode = async (win) => {
         //   console.log(start, end);
         // }
 
-        // sinkFileStream.close();
+        // stream.close();
       } catch (err) {
         console.log(err);
       }
