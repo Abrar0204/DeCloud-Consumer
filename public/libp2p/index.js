@@ -80,25 +80,32 @@ const startNode = async (win) => {
 
     for await (let peer of node.peerStore.getPeers()) {
       try {
-        let peerAccountNumber = "";
-
         const { stream } = await node.dialProtocol(peer.id, "/send-file/1.0.0");
 
         await pipe(
           fileStream.pipe(cipher).pipe(appendInitVectAndFileHash),
           // fileStream,
-          stream
+          stream,
+          async (source) => {
+            for await (const msg of source) {
+              const peerAccountNumber = msg.toString().trim();
+              console.log(
+                "[INFO] remote peer account number: ",
+                peerAccountNumber
+              );
+              const [fileName, fileType] =
+                getFileNameAndTypeFromFilePath(filepath);
+
+              win.webContents.send("file-sent-successfully", {
+                fileHash,
+                fileName,
+                fileType,
+                storedIn: peer.id.toB58String(),
+                storedMetaMaskNumber: peerAccountNumber,
+              });
+            }
+          }
         );
-
-        const [fileName, fileType] = getFileNameAndTypeFromFilePath(filepath);
-
-        win.webContents.send("file-sent-successfully", {
-          fileHash,
-          fileName,
-          fileType,
-          storedIn: peer.id.toB58String(),
-          storedMetaMaskNumber: peerAccountNumber,
-        });
 
         // for (let start = 0; start < fileSize; start += partitionSize + 1) {
         //   let end = start + partitionSize;
