@@ -2,6 +2,7 @@ import { Flex, Button, useToast } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import dragDrop from "drag-drop";
 import { useEffect } from "react";
+import { useFile } from "../context/FileContext";
 
 dragDrop("#root", (files) => {
   const _files = files.map((file) => {
@@ -14,8 +15,8 @@ dragDrop("#root", (files) => {
   window.api.send("filepath", _files);
 });
 
-const Home = ({ ethers }) => {
-  const { files, addFile } = ethers;
+const Home = () => {
+  const { files, addFile } = useFile();
   const toast = useToast();
 
   useEffect(() => {

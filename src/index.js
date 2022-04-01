@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.css";
 import { ChakraProvider, extendTheme, ColorModeScript } from "@chakra-ui/react";
+import { FileProvider } from "./context/FileContext";
 
 const theme = {
   config: {
@@ -21,7 +22,9 @@ ReactDOM.render(
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
 
     <ChakraProvider theme={extendTheme(theme)}>
-      <App />
+      <FileProvider>
+        <App />
+      </FileProvider>
     </ChakraProvider>
   </>,
   document.getElementById("root")
