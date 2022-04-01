@@ -5,7 +5,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("api", {
   send: (channel, data) => {
     // whitelist channels
-    let validChannels = ["filepath", "logging"];
+    let validChannels = ["filepath", "logging", "download-file"];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     }

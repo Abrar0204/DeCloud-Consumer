@@ -3,8 +3,10 @@ const fs = require("fs");
 const PeerId = require("peer-id");
 const path = require("path");
 const pipe = require("it-pipe");
-const { getCipherAndInitVect, getHash } = require("../crypto");
+const { getCipherAndInitVect, getHash, getDecipher } = require("../crypto");
 const { ipcMain, dialog } = require("electron");
+const { BufferListStream } = require("bl/bl");
+const appDir = path.resolve(require("os").homedir(), ".DeCloud");
 
 const startNode = async (win) => {
   let id;
@@ -46,6 +48,53 @@ const startNode = async (win) => {
     console.log("[LOG-FROM-RENDERER]:", data);
   });
 
+  ipcMain.on("download-file", async (_, fileData) => {
+    try {
+      console.log(fileData);
+
+      const { fileName, fileType, fileHash, storedIn, splitInto } = fileData;
+      const storagePeerId = PeerId.createFromB58String(storedIn);
+
+      const { stream } = await node.dialProtocol(
+        storagePeerId,
+        "/decloud/get-file/1.0.0"
+      );
+
+      await pipe(
+        [JSON.stringify({ fileHash, splitInto })],
+        stream,
+        async (source) => {
+          const bl = new BufferListStream();
+
+          for await (const msg of source) {
+            bl.append(msg);
+          }
+
+          // //Remove after checking if decrypt works !!!
+          let newStartingBuffer = bl._bufs[0].slice(64);
+          bl._bufs[0] = newStartingBuffer;
+
+          const initVect = bl._bufs[0].slice(0, 16);
+
+          newStartingBuffer = bl._bufs[0].slice(16);
+          bl._bufs[0] = newStartingBuffer;
+
+          const peerPrivKey = require(path.join(__dirname, "./peer-id.json"));
+
+          const { decipher } = getDecipher(peerPrivKey.privKey, initVect);
+
+          const writeStream = fs.createWriteStream(
+            path.join(appDir, `${fileName}.${fileType}`)
+          );
+
+          bl.pipe(decipher).pipe(writeStream);
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
   ipcMain.on("filepath", async (_, filesFromDrop) => {
     let filepath;
 
@@ -80,7 +129,10 @@ const startNode = async (win) => {
 
     for await (let peer of node.peerStore.getPeers()) {
       try {
-        const { stream } = await node.dialProtocol(peer.id, "/send-file/1.0.0");
+        const { stream } = await node.dialProtocol(
+          peer.id,
+          "/decloud/send-file/1.0.0"
+        );
 
         await pipe(
           fileStream.pipe(cipher).pipe(appendInitVectAndFileHash),
@@ -88,7 +140,8 @@ const startNode = async (win) => {
           stream,
           async (source) => {
             for await (const msg of source) {
-              const peerAccountNumber = msg.toString().trim();
+              const { accountNumber: peerAccountNumber, splitInto } =
+                JSON.parse(msg.toString().trim());
               console.log(
                 "[INFO] remote peer account number: ",
                 peerAccountNumber
@@ -102,6 +155,7 @@ const startNode = async (win) => {
                 fileType,
                 storedIn: peer.id.toB58String(),
                 storedMetaMaskNumber: peerAccountNumber,
+                splitInto,
               });
             }
           }

@@ -24,7 +24,7 @@ const useEthers = () => {
     const signer = web3Provider.getSigner(wcProvider.accounts[0]);
 
     const fContract = new ethers.Contract(
-      "0x6366565Db65F748450D80159e98756332B115d1D",
+      "0x82A27f22bFf1c85507FCb472519293D0501CD2A9",
       DeCloudFiles.abi,
       signer
     );
@@ -46,11 +46,13 @@ const useEthers = () => {
     const newFiles = [];
     for (let i = 0; i < noOfFiles; i++) {
       const file = await con?.getFile(i);
+
       newFiles.push({
         fileHash: file[0],
         fileName: file[1],
         fileType: file[2],
         storedIn: file[3],
+        splitInto: file[4].toNumber(),
       });
     }
 
@@ -65,6 +67,7 @@ const useEthers = () => {
       fileType,
       storedIn,
       storedMetaMaskNumber,
+      splitInto,
     }) => {
       const options = { value: ethers.utils.parseEther("1.0") };
       await fileContract?.addFile(
@@ -73,9 +76,10 @@ const useEthers = () => {
         fileType,
         storedIn,
         storedMetaMaskNumber,
+        splitInto,
         options
       );
-      setFiles((prev) => [...prev, { fileHash, fileName, fileType, storedIn }]);
+      refreshFiles(fileContract);
     },
     [fileContract]
   );

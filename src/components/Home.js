@@ -1,4 +1,4 @@
-import { Flex, Button, Text, useToast } from "@chakra-ui/react";
+import { Flex, Button, useToast } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import dragDrop from "drag-drop";
 import { useEffect } from "react";
@@ -19,16 +19,15 @@ const Home = ({ ethers }) => {
   const toast = useToast();
 
   useEffect(() => {
-    window.api.listen("file-sent-successfully", (event, fileData) => {
+    window.api.listen("file-sent-successfully", async (event, fileData) => {
       toast({
         title: "File Uploaded Successfully.",
         status: "success",
         duration: 5000,
         isClosable: true,
       });
-
-      // console.log(fileData);
       addFile(fileData);
+      // console.log(fileData);
     });
   }, [toast, addFile]);
 
@@ -36,11 +35,17 @@ const Home = ({ ethers }) => {
     window.api.send("filepath", null);
   };
 
+  const downloadFile = (file) => (e) => {
+    window.api.send("download-file", file);
+  };
+
   return (
     <div className="Home">
       <Flex marginTop="10" direction={"column"} alignItems="center">
-        {files.map(({ fileHash, fileName, fileType, storedIn }) => (
-          <Text key={fileHash}>{fileName}</Text>
+        {files.map((file) => (
+          <Button key={file.fileHash} onClick={downloadFile(file)}>
+            {file.fileName}
+          </Button>
         ))}
       </Flex>
       <Button

@@ -21,6 +21,13 @@ function getCipherAndInitVect(password, fileHash) {
   return { cipher, appendInitVectAndFileHash };
 }
 
+function getDecipher(password, initVect) {
+  const CIPHER_KEY = getCipherKey(password);
+  const decipher = crypto.createDecipheriv("aes-256-cbc", CIPHER_KEY, initVect);
+
+  return { decipher };
+}
+
 function getCipherKey(password) {
   return crypto.createHash("sha256").update(password).digest();
 }
@@ -28,4 +35,5 @@ function getCipherKey(password) {
 module.exports = {
   getCipherAndInitVect,
   getHash,
+  getDecipher,
 };
