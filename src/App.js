@@ -2,26 +2,26 @@ import Home from "./screens/Home";
 import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import { useFile } from "./context/FileContext";
 import Connect from "./screens/Connect";
+import Main from "./components/Main";
+import MyFiles from "./screens/MyFiles";
 
 function App() {
   const { accountNumber, connectToMetaMask } = useFile();
 
   return (
     <div className="App">
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              accountNumber ? (
-                <Home />
-              ) : (
-                <Connect connectToMetaMask={connectToMetaMask} />
-              )
-            }
-          />
-        </Routes>
-      </Router>
+      {accountNumber ? (
+        <Router>
+          <Main>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/files" element={<MyFiles />} />
+            </Routes>
+          </Main>
+        </Router>
+      ) : (
+        <Connect connectToMetaMask={connectToMetaMask} />
+      )}
     </div>
   );
 }

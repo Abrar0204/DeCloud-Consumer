@@ -1,8 +1,9 @@
-import { Flex, Button, useToast } from "@chakra-ui/react";
-import { AttachmentIcon } from "@chakra-ui/icons";
+import { Flex, Button, useToast, Heading, Box } from "@chakra-ui/react";
 import dragDrop from "drag-drop";
 import { useEffect } from "react";
 import { useFile } from "../context/FileContext";
+import { FaUpload } from "react-icons/fa";
+import FileCard from "../components/FileCard";
 
 dragDrop("#root", (files) => {
   const _files = files.map((file) => {
@@ -36,21 +37,18 @@ const Home = () => {
     window.api.send("filepath", null);
   };
 
-  const downloadFile = (file) => (e) => {
-    window.api.send("download-file", file);
-  };
-
   return (
-    <div className="Home">
-      <Flex marginTop="10" direction={"column"} alignItems="center">
+    <Box className="Home">
+      <Heading fontFamily="fantasy" fontWeight="400" marginBottom="6">
+        Recent Files
+      </Heading>
+      <Flex>
         {files.map((file) => (
-          <Button key={file.fileHash} onClick={downloadFile(file)}>
-            {file.fileName}
-          </Button>
+          <FileCard file={file} />
         ))}
       </Flex>
       <Button
-        leftIcon={<AttachmentIcon />}
+        leftIcon={<FaUpload />}
         colorScheme="purple"
         onClick={sendFile}
         position="fixed"
@@ -59,7 +57,7 @@ const Home = () => {
       >
         Upload a File
       </Button>
-    </div>
+    </Box>
   );
 };
 
