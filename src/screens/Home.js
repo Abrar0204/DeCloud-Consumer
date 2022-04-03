@@ -25,7 +25,7 @@ const Home = () => {
       </Heading>
       <Flex>
         {files.map((file) => (
-          <FileCard file={file} />
+          <FileCard key={file.fileHash} file={file} />
         ))}
       </Flex>
       <UploadFileButton />

@@ -35,7 +35,7 @@ const MyFiles = () => {
               <Th width="20%">Name</Th>
               <Th width="10%">Size</Th>
               <Th width="20%">Upload Date</Th>
-              <Th width="35%">Stored Nodes</Th>
+              <Th width="35%">Storage Nodes</Th>
               <Th>Actions</Th>
             </Tr>
           </Thead>
@@ -57,7 +57,7 @@ const MyFiles = () => {
 };
 
 const FileRow = ({ file, sNo, downloadFile }) => {
-  const { fileName, uploadDateUTC, fileSize, fileType, storedIn } = file;
+  const { fileName, uploadDateEnoch, fileSize, fileType, storedIn } = file;
   return (
     <Tr>
       <Td width="5%">{sNo}</Td>
@@ -65,9 +65,9 @@ const FileRow = ({ file, sNo, downloadFile }) => {
         {fileName}.{fileType}
       </Td>
       <Td width="10%">{(fileSize * 0.000001).toPrecision(2)} MB</Td>
-      <Td width="25%">{format(uploadDateUTC, "dd MMM yyyy hh:mm aaa")}</Td>
+      <Td width="25%">{format(uploadDateEnoch, "dd MMM yyyy hh:mm aaa")}</Td>
       <Td width="35%" isTruncated>
-        {storedIn}
+        {storedIn[0]}
       </Td>
       <Td>
         <IconButton icon={<FaDownload />} onClick={downloadFile} />

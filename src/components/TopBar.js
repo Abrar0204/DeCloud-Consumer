@@ -40,6 +40,7 @@ const TopBar = () => {
           bg="gray.900"
           justify="space-between"
           rounded="10000px"
+          _hover={{ cursor: "pointer" }}
           onClick={disconnect}
         >
           <Text isTruncated>{accountNumber}</Text>

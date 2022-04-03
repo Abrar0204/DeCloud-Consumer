@@ -53,7 +53,7 @@ const startNode = async (win) => {
       console.log(fileData);
 
       const { fileName, fileType, fileHash, storedIn, splitInto } = fileData;
-      const storagePeerId = PeerId.createFromB58String(storedIn);
+      const storagePeerId = PeerId.createFromB58String(storedIn[0]);
 
       const { stream } = await node.dialProtocol(
         storagePeerId,
@@ -127,10 +127,18 @@ const startNode = async (win) => {
       fileHash
     );
 
+    const storageNodes = [];
+
     for await (let peer of node.peerStore.getPeers()) {
       try {
-        const { stream } = await node.dialProtocol(
-          peer.id,
+        // If peer doesn't support protocol go to next
+        if (!peer.protocols.includes("/decloud/send-file/1.0.0")) continue;
+
+        // If peer is not online/connected go to next
+        const connection = node.connectionManager.get(peer.id);
+        if (!connection) continue;
+
+        const { stream } = await connection.newStream(
           "/decloud/send-file/1.0.0"
         );
 
@@ -153,7 +161,7 @@ const startNode = async (win) => {
                 fileHash,
                 fileName,
                 fileType,
-                storedIn: peer.id.toB58String(),
+                storedIn: [peer.id.toB58String()],
                 storedMetaMaskNumber: peerAccountNumber,
                 splitInto,
                 fileSize: fileSize - 16,

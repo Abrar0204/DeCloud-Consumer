@@ -25,12 +25,12 @@ createAppDirectory();
 // Create the native browser window.
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+  mainWindow.maximize();
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
