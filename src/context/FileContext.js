@@ -5,7 +5,7 @@ import DeCloudFiles from "../res/contracts/DeCloudFiles.json";
 
 const wcProvider = new WalletConnectProvider({
   rpc: {
-    1337: "http://127.0.0.1:7545",
+    1337: "http://192.168.1.28:7545",
   },
 });
 const FileContext = createContext();
@@ -19,46 +19,54 @@ const FileProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState("false");
 
   const connectToMetaMask = async () => {
-    await wcProvider.enable();
-    const web3Provider = new ethers.providers.Web3Provider(wcProvider);
+    try {
+      await wcProvider.enable();
+      const web3Provider = new ethers.providers.Web3Provider(wcProvider);
 
-    const signer = web3Provider.getSigner(wcProvider.accounts[0]);
+      const signer = web3Provider.getSigner(wcProvider.accounts[0]);
 
-    const fContract = new ethers.Contract(
-      "0x82A27f22bFf1c85507FCb472519293D0501CD2A9",
-      DeCloudFiles.abi,
-      signer
-    );
+      const fContract = new ethers.Contract(
+        "0x82A27f22bFf1c85507FCb472519293D0501CD2A9",
+        DeCloudFiles.abi,
+        signer
+      );
 
-    console.log(wcProvider.accounts[0]);
-    setAccountNumber(wcProvider.accounts[0]);
-    setFileContract(fContract);
-    refreshFiles(fContract);
+      console.log(wcProvider.accounts[0]);
+      setAccountNumber(wcProvider.accounts[0]);
+      setFileContract(fContract);
+      refreshFiles(fContract);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const refreshFiles = async (con) => {
-    setIsLoading(true);
-    const noOfFiles = await con?.getNoOfFile();
+    try {
+      setIsLoading(true);
+      const noOfFiles = await con?.getNoOfFile();
 
-    if (!noOfFiles) {
+      if (!noOfFiles) {
+        setIsLoading(false);
+        return;
+      }
+      const newFiles = [];
+      for (let i = 0; i < noOfFiles; i++) {
+        const file = await con?.getFile(i);
+
+        newFiles.push({
+          fileHash: file[0],
+          fileName: file[1],
+          fileType: file[2],
+          storedIn: file[3],
+          splitInto: file[4].toNumber(),
+        });
+      }
+
+      setFiles(newFiles);
       setIsLoading(false);
-      return;
+    } catch (err) {
+      console.log(err);
     }
-    const newFiles = [];
-    for (let i = 0; i < noOfFiles; i++) {
-      const file = await con?.getFile(i);
-
-      newFiles.push({
-        fileHash: file[0],
-        fileName: file[1],
-        fileType: file[2],
-        storedIn: file[3],
-        splitInto: file[4].toNumber(),
-      });
-    }
-
-    setFiles(newFiles);
-    setIsLoading(false);
   };
 
   const addFile = useCallback(
@@ -70,17 +78,21 @@ const FileProvider = ({ children }) => {
       storedMetaMaskNumber,
       splitInto,
     }) => {
-      const options = { value: ethers.utils.parseEther("1.0") };
-      await fileContract?.addFile(
-        fileHash,
-        fileName,
-        fileType,
-        storedIn,
-        storedMetaMaskNumber,
-        splitInto,
-        options
-      );
-      refreshFiles(fileContract);
+      try {
+        const options = { value: ethers.utils.parseEther("1.0") };
+        await fileContract?.addFile(
+          fileHash,
+          fileName,
+          fileType,
+          storedIn,
+          storedMetaMaskNumber,
+          splitInto,
+          options
+        );
+        refreshFiles(fileContract);
+      } catch (err) {
+        console.log(err);
+      }
     },
     [fileContract]
   );

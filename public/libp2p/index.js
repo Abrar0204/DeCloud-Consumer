@@ -84,7 +84,7 @@ const startNode = async (win) => {
           const { decipher } = getDecipher(peerPrivKey.privKey, initVect);
 
           const writeStream = fs.createWriteStream(
-            path.join(appDir, `${fileName}.${fileType}`)
+            path.join(appDir, "files", `${fileName}.${fileType}`)
           );
 
           bl.pipe(decipher).pipe(writeStream);

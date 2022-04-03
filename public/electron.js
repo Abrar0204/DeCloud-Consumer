@@ -3,7 +3,24 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { startNode } = require("./libp2p");
-const url = require("url");
+const os = require("os");
+const fs = require("fs");
+const appDir = path.resolve(os.homedir(), ".DeCloud");
+const hidefile = require("hidefile");
+
+const createAppDirectory = () => {
+  if (!fs.existsSync(appDir)) {
+    fs.mkdir(appDir, (err) => {
+      if (err) {
+        throw err;
+      }
+      hidefile.hideSync(appDir);
+      fs.mkdir(path.join(appDir, "files"));
+    });
+  }
+};
+
+createAppDirectory();
 
 // Create the native browser window.
 function createWindow() {
