@@ -2,7 +2,6 @@ import { useState, useCallback, createContext, useContext } from "react";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
 import DeCloudFiles from "../res/contracts/DeCloudFiles.json";
-
 const wcProvider = new WalletConnectProvider({
   rpc: {
     1337: "http://192.168.1.28:7545",
@@ -14,9 +13,14 @@ const FileProvider = ({ children }) => {
   const [accountNumber, setAccountNumber] = useState("");
   const [fileContract, setFileContract] = useState(null);
   // const [paymentContract,setPaymentContract]=useState(null);
-
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState("false");
+
+  const disconnect = async () => {
+    console.log("Being called");
+    await wcProvider.disconnect();
+    setAccountNumber("");
+  };
 
   const connectToMetaMask = async () => {
     try {
@@ -26,7 +30,7 @@ const FileProvider = ({ children }) => {
       const signer = web3Provider.getSigner(wcProvider.accounts[0]);
 
       const fContract = new ethers.Contract(
-        "0x82A27f22bFf1c85507FCb472519293D0501CD2A9",
+        "0x220d6A0867a4304a32918A02Ae8EA0ab32f09aD0",
         DeCloudFiles.abi,
         signer
       );
@@ -53,12 +57,15 @@ const FileProvider = ({ children }) => {
       for (let i = 0; i < noOfFiles; i++) {
         const file = await con?.getFile(i);
 
+        console.log(file[5]);
         newFiles.push({
           fileHash: file[0],
           fileName: file[1],
           fileType: file[2],
           storedIn: file[3],
           splitInto: file[4].toNumber(),
+          uploadDateUTC: file[5],
+          fileSize: file[6].toNumber(),
         });
       }
 
@@ -77,9 +84,16 @@ const FileProvider = ({ children }) => {
       storedIn,
       storedMetaMaskNumber,
       splitInto,
+      fileSize,
     }) => {
       try {
-        const options = { value: ethers.utils.parseEther("1.0") };
+        // One byte = One Mwei = 	1,000,000 Wei
+        const options = {
+          value: ethers.utils.parseEther(
+            ethers.utils.formatEther(fileSize * 1000000)
+          ),
+        };
+        const uploadDateUTC = Date.now();
         await fileContract?.addFile(
           fileHash,
           fileName,
@@ -87,9 +101,22 @@ const FileProvider = ({ children }) => {
           storedIn,
           storedMetaMaskNumber,
           splitInto,
+          uploadDateUTC,
+          fileSize,
           options
         );
-        refreshFiles(fileContract);
+        setFiles((prev) => [
+          ...prev,
+          {
+            fileHash,
+            fileName,
+            fileType,
+            storedIn,
+            splitInto,
+            uploadDateUTC,
+            fileSize,
+          },
+        ]);
       } catch (err) {
         console.log(err);
       }
@@ -105,6 +132,7 @@ const FileProvider = ({ children }) => {
         isLoading,
         accountNumber,
         addFile,
+        disconnect,
       }}
     >
       {children}
@@ -113,8 +141,14 @@ const FileProvider = ({ children }) => {
 };
 
 const useFile = () => {
-  const { connectToMetaMask, files, isLoading, accountNumber, addFile } =
-    useContext(FileContext);
+  const {
+    connectToMetaMask,
+    files,
+    isLoading,
+    accountNumber,
+    disconnect,
+    addFile,
+  } = useContext(FileContext);
 
   return {
     connectToMetaMask,
@@ -122,6 +156,7 @@ const useFile = () => {
     isLoading,
     accountNumber,
     addFile,
+    disconnect,
   };
 };
 

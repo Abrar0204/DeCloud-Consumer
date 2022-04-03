@@ -19,7 +19,7 @@ import {
 import format from "date-fns/format";
 
 const FileCard = ({ file }) => {
-  const { fileName, fileType } = file;
+  const { fileName, fileType, uploadDateUTC } = file;
 
   const getIconForType = (fileType) => {
     switch (fileType) {
@@ -50,6 +50,7 @@ const FileCard = ({ file }) => {
       rounded="md"
       paddingY="3"
       paddingX="3"
+      margin="2"
     >
       <Flex width="100%" justify="space-between">
         {getIconForType(fileType)}
@@ -71,7 +72,7 @@ const FileCard = ({ file }) => {
         {fileName}.{fileType}
       </Text>
       <Text marginTop="2" fontSize="smaller">
-        {format(Date.now(), "dd MMM yyyy")}
+        {format(uploadDateUTC, "dd MMM yyyy")}
       </Text>
     </Flex>
   );

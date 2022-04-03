@@ -12,7 +12,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { useFile } from "../context/FileContext";
 
 const TopBar = () => {
-  const { accountNumber } = useFile();
+  const { accountNumber, disconnect } = useFile();
   return (
     <Flex height="50px" justify="flex-end" align="center" marginY="3">
       <Flex justify="flex-end" width="60%">
@@ -40,6 +40,7 @@ const TopBar = () => {
           bg="gray.900"
           justify="space-between"
           rounded="10000px"
+          onClick={disconnect}
         >
           <Text isTruncated>{accountNumber}</Text>
           <Avatar bg="blue.500" margin="0" />

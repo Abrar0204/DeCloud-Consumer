@@ -156,6 +156,7 @@ const startNode = async (win) => {
                 storedIn: peer.id.toB58String(),
                 storedMetaMaskNumber: peerAccountNumber,
                 splitInto,
+                fileSize: fileSize - 16,
               });
             }
           }
