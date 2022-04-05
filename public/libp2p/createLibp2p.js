@@ -5,6 +5,7 @@ const defaultsDeep = require("defaults-deep");
 const libp2p = require("libp2p");
 const MulticastDNS = require("libp2p-mdns");
 const Gossipsub = require("libp2p-gossipsub");
+const KadDHT = require("libp2p-kad-dht");
 
 async function createLibp2p(_options) {
   const defaults = {
@@ -14,6 +15,7 @@ async function createLibp2p(_options) {
       connEncryption: [NOISE],
       pubsub: Gossipsub,
       peerDiscovery: [MulticastDNS],
+      dht: KadDHT,
     },
     config: {
       peerDiscovery: {
@@ -21,6 +23,9 @@ async function createLibp2p(_options) {
           interval: 20e3,
           enabled: true,
         },
+      },
+      dht: {
+        enabled: true,
       },
     },
   };

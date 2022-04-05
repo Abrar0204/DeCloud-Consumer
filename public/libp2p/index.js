@@ -8,23 +8,29 @@ const { ipcMain, dialog } = require("electron");
 const { BufferListStream } = require("bl/bl");
 const appDir = path.resolve(require("os").homedir(), ".DeCloud");
 
-const startNode = async (win) => {
-  let id;
+const getPeerId = async () => {
+  const peerIdPath = path.join(__dirname, "./peer-id.json");
+
   try {
-    const idJson = require(path.join(__dirname, "./peer-id.json"));
-    id = await PeerId.createFromJSON(idJson);
-  } catch (err) {
-    id = await PeerId.create({ bits: 1024, keyType: "RSA" });
-    fs.writeFile(
-      path.join(__dirname, "./peer-id.json"),
-      JSON.stringify(id.toJSON(), null, 2),
-      (err) => {
+    if (fs.existsSync(peerIdPath)) {
+      const idJson = require(peerIdPath);
+      return await PeerId.createFromJSON(idJson);
+    } else {
+      const id = await PeerId.create({ bits: 1024, keyType: "RSA" });
+      fs.writeFile(peerIdPath, JSON.stringify(id.toJSON(), null, 2), (err) => {
         if (err) {
           console.log(err);
         }
-      }
-    );
+      });
+      return id;
+    }
+  } catch (err) {
+    console.log(err);
   }
+};
+
+const startNode = async (win) => {
+  const id = await getPeerId();
   const node = await createLibp2p({
     peerId: id,
     addresses: {
@@ -44,15 +50,33 @@ const startNode = async (win) => {
     console.log("connected to: ", connection.remotePeer.toB58String());
   });
 
-  ipcMain.on("logging", (data) => {
+  ipcMain.on("logging", (_, data) => {
     console.log("[LOG-FROM-RENDERER]:", data);
+  });
+
+  ipcMain.on("delete-file", async (_, fileData) => {
+    try {
+      const storagePeerId = PeerId.createFromB58String(fileData.storedIn[0]);
+
+      const { stream } = await node.dialProtocol(
+        storagePeerId,
+        "/decloud/delete-file/1.0.0"
+      );
+
+      await pipe([JSON.stringify(fileData)], stream, async (source) => {
+        for await (const msg of source) {
+          console.log(msg.toString().trim());
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   ipcMain.on("download-file", async (_, fileData) => {
     try {
-      console.log(fileData);
-
       const { fileName, fileType, fileHash, storedIn, splitInto } = fileData;
+
       const storagePeerId = PeerId.createFromB58String(storedIn[0]);
 
       const { stream } = await node.dialProtocol(
@@ -67,7 +91,21 @@ const startNode = async (win) => {
           const bl = new BufferListStream();
 
           for await (const msg of source) {
-            bl.append(msg);
+            try {
+              const d = JSON.parse(msg.toString().trim());
+              console.log("Not Found");
+              if (d.isNotFound) {
+                win.webContents.send("file-not-found", {
+                  storageAddress: d.accountNumber,
+                  fileUploadDate: fileData.uploadDateEnoch,
+                });
+                return;
+              } else {
+                bl.append(msg);
+              }
+            } catch (_) {
+              bl.append(msg);
+            }
           }
 
           // //Remove after checking if decrypt works !!!
@@ -88,6 +126,7 @@ const startNode = async (win) => {
           );
 
           bl.pipe(decipher).pipe(writeStream);
+          win.webContents.send("file-downloaded", path.join(appDir, "files"));
         }
       );
     } catch (err) {
@@ -95,7 +134,7 @@ const startNode = async (win) => {
     }
   });
 
-  ipcMain.on("filepath", async (_, filesFromDrop) => {
+  ipcMain.on("upload-file", async (_, filesFromDrop) => {
     let filepath;
 
     if (filesFromDrop == null) {
@@ -136,6 +175,7 @@ const startNode = async (win) => {
 
         // If peer is not online/connected go to next
         const connection = node.connectionManager.get(peer.id);
+
         if (!connection) continue;
 
         const { stream } = await connection.newStream(
@@ -162,7 +202,7 @@ const startNode = async (win) => {
                 fileName,
                 fileType,
                 storedIn: [peer.id.toB58String()],
-                storedMetaMaskNumber: peerAccountNumber,
+                storedMetaMaskNumber: [peerAccountNumber],
                 splitInto,
                 fileSize: fileSize - 16,
               });

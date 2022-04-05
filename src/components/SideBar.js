@@ -31,7 +31,12 @@ const SideBar = () => {
       </Tooltip>
 
       <Tooltip label="View Network">
-        <IconButton icon={<FaNetworkWired />} marginY="2" />
+        <IconButton
+          as={RouterLink}
+          to="/network"
+          icon={<FaNetworkWired />}
+          marginY="2"
+        />
       </Tooltip>
     </Flex>
   );

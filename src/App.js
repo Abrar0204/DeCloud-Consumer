@@ -4,27 +4,18 @@ import { useFile } from "./context/FileContext";
 import Connect from "./screens/Connect";
 import Main from "./components/Main";
 import MyFiles from "./screens/MyFiles";
-import { useEffect } from "react";
-import { useToast } from "@chakra-ui/toast";
+import {
+  Modal,
+  ModalOverlay,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+} from "@chakra-ui/modal";
+import Network from "./screens/Network";
 
 function App() {
-  const { accountNumber, connectToMetaMask, addFile } = useFile();
-  const toast = useToast();
-  useEffect(() => {
-    window.api.listen("file-sent-successfully", async (_, fileData) => {
-      try {
-        await addFile(fileData);
-        toast({
-          title: "File Uploaded Successfully.",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    });
-  }, [toast, addFile]);
+  const { accountNumber, connectToMetaMask, isOpen } = useFile();
 
   return (
     <div className="App">
@@ -34,12 +25,23 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/files" element={<MyFiles />} />
+              <Route path="/network" element={<Network />} />
             </Routes>
           </Main>
         </Router>
       ) : (
         <Connect connectToMetaMask={connectToMetaMask} />
       )}
+      <Modal isOpen={isOpen} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Transaction Approval</ModalHeader>
+          <ModalBody>
+            Approve the transaction that appears in your MetaMask App
+          </ModalBody>
+          <ModalFooter />
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

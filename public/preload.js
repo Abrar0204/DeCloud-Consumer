@@ -5,14 +5,23 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("api", {
   send: (channel, data) => {
     // whitelist channels
-    let validChannels = ["filepath", "logging", "download-file"];
+    let validChannels = [
+      "upload-file",
+      "logging",
+      "download-file",
+      "delete-file",
+    ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     }
   },
 
   listen: (channel, handler) => {
-    let validChannels = ["file-sent-successfully"];
+    let validChannels = [
+      "file-sent-successfully",
+      "file-downloaded",
+      "file-not-found",
+    ];
     if (validChannels.includes(channel)) {
       // In case useEffect call listen multiple times
       ipcRenderer.removeAllListeners(channel);

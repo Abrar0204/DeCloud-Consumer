@@ -4,7 +4,7 @@ import { FaUpload } from "react-icons/fa";
 
 const UploadFileButton = () => {
   const sendFile = () => {
-    window.api.send("filepath", null);
+    window.api.send("upload-file", null);
   };
   return (
     <Button

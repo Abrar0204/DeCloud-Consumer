@@ -67,7 +67,13 @@ const FileCard = ({ file }) => {
         </Menu>
       </Flex>
 
-      <Text marginTop="4" fontSize="lg" fontWeight="bold" isTruncated>
+      <Text
+        marginTop="4"
+        fontSize="lg"
+        fontWeight="bold"
+        maxWidth="150px"
+        isTruncated
+      >
         {fileName}.{fileType}
       </Text>
       <Text marginTop="2" fontSize="smaller">
