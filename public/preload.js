@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("api", {
       "file-sent-successfully",
       "file-downloaded",
       "file-not-found",
+      "no-nodes-found",
     ];
     if (validChannels.includes(channel)) {
       // In case useEffect call listen multiple times

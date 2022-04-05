@@ -155,6 +155,9 @@ const FileProvider = ({ children }) => {
         console.log(err);
       }
     });
+  }, [addFile]);
+
+  useEffect(() => {
     window.api.listen("file-downloaded", async (_, fileLocation) => {
       toast({
         title: "File Downloaded",
@@ -165,6 +168,8 @@ const FileProvider = ({ children }) => {
         isClosable: true,
       });
     });
+  }, [toast]);
+  useEffect(() => {
     window.api.listen("file-not-found", async (_, fileData) => {
       try {
         toast({
@@ -180,7 +185,20 @@ const FileProvider = ({ children }) => {
         console.log(err);
       }
     });
-  }, [toast, addFile, onOpen, onClose, getRefund]);
+  }, [getRefund, toast]);
+
+  useEffect(() => {
+    window.api.listen("no-nodes-found", (_) => {
+      toast({
+        title: "No Storage Nodes Found",
+        description: `Please try again later`,
+        status: "warning",
+        duration: 2000,
+        position: "top",
+        isClosable: true,
+      });
+    });
+  }, [toast]);
 
   const refreshFiles = async (con) => {
     try {

@@ -166,6 +166,8 @@ const startNode = async (win) => {
       fileHash
     );
 
+    const [fileName, fileType] = getFileNameAndTypeFromFilePath(filepath);
+
     const storageNodes = [];
 
     for await (let peer of node.peerStore.getPeers()) {
@@ -190,22 +192,16 @@ const startNode = async (win) => {
             for await (const msg of source) {
               const { accountNumber: peerAccountNumber, splitInto } =
                 JSON.parse(msg.toString().trim());
+
+              storageNodes.push({
+                peerAccountNumber,
+                peerId: peer.id.toB58String(),
+                splitInto,
+              });
               console.log(
                 "[INFO] remote peer account number: ",
                 peerAccountNumber
               );
-              const [fileName, fileType] =
-                getFileNameAndTypeFromFilePath(filepath);
-
-              win.webContents.send("file-sent-successfully", {
-                fileHash,
-                fileName,
-                fileType,
-                storedIn: [peer.id.toB58String()],
-                storedMetaMaskNumber: [peerAccountNumber],
-                splitInto,
-                fileSize: fileSize - 16,
-              });
             }
           }
         );
@@ -224,6 +220,25 @@ const startNode = async (win) => {
         console.log(err);
       }
     }
+
+    if (storageNodes.length === 0) {
+      win.webContents.send("no-nodes-found");
+      return;
+    }
+
+    console.log(
+      storageNodes.map((s) => s.peerId),
+      storageNodes.map((s) => s.peerAccountNumber)
+    );
+    // win.webContents.send("file-sent-successfully", {
+    //   fileHash,
+    //   fileName,
+    //   fileType,
+    //   storedIn: storageNodes.map((s) => s.peerId),
+    //   storedMetaMaskNumber: storageNodes.map((s) => s.peerAccountNumber),
+    //   splitInto: storageNodes[0].splitInto,
+    //   fileSize: fileSize - 16,
+    // });
   });
 };
 
