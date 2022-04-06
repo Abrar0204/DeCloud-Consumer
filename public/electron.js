@@ -8,6 +8,8 @@ const fs = require("fs");
 const appDir = path.resolve(os.homedir(), ".DeCloud");
 const hidefile = require("hidefile");
 
+app.disableHardwareAcceleration();
+
 const createAppDirectory = () => {
   if (!fs.existsSync(appDir)) {
     fs.mkdir(appDir, (err) => {

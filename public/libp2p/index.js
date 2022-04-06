@@ -46,8 +46,12 @@ const startNode = async (win) => {
     console.log(ma.toString() + "/p2p/" + id.toB58String());
   });
 
+  node.on("peer:discovery", (peerId) => {
+    console.log(`[DISCOVERED]: ${peerId.toB58String()}`);
+  });
+
   node.connectionManager.on("peer:connect", (connection) => {
-    console.log("connected to: ", connection.remotePeer.toB58String());
+    console.log("[CONNECTED]:", connection.remotePeer.toB58String());
   });
 
   ipcMain.on("logging", (_, data) => {
@@ -226,19 +230,15 @@ const startNode = async (win) => {
       return;
     }
 
-    console.log(
-      storageNodes.map((s) => s.peerId),
-      storageNodes.map((s) => s.peerAccountNumber)
-    );
-    // win.webContents.send("file-sent-successfully", {
-    //   fileHash,
-    //   fileName,
-    //   fileType,
-    //   storedIn: storageNodes.map((s) => s.peerId),
-    //   storedMetaMaskNumber: storageNodes.map((s) => s.peerAccountNumber),
-    //   splitInto: storageNodes[0].splitInto,
-    //   fileSize: fileSize - 16,
-    // });
+    win.webContents.send("file-sent-successfully", {
+      fileHash,
+      fileName,
+      fileType,
+      storedIn: storageNodes.map((s) => s.peerId),
+      storedMetaMaskNumber: storageNodes.map((s) => s.peerAccountNumber),
+      splitInto: storageNodes[0].splitInto,
+      fileSize: fileSize - 16,
+    });
   });
 };
 

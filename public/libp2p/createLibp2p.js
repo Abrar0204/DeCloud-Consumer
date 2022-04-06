@@ -4,8 +4,6 @@ const { NOISE } = require("libp2p-noise");
 const defaultsDeep = require("defaults-deep");
 const libp2p = require("libp2p");
 const MulticastDNS = require("libp2p-mdns");
-const Gossipsub = require("libp2p-gossipsub");
-const KadDHT = require("libp2p-kad-dht");
 
 async function createLibp2p(_options) {
   const defaults = {
@@ -13,20 +11,37 @@ async function createLibp2p(_options) {
       transport: [TCP],
       streamMuxer: [Mplex],
       connEncryption: [NOISE],
-      pubsub: Gossipsub,
-      peerDiscovery: [MulticastDNS],
-      dht: KadDHT,
+      // pubsub: Gossipsub,
+      peerDiscovery: [
+        // Bootstrap,
+        // PubsubPeerDiscovery,
+        MulticastDNS,
+      ],
+      // dht: KadDHT,
     },
     config: {
       peerDiscovery: {
-        mdns: {
+        // autoDial: true,
+        // [PubsubPeerDiscovery.tag]: {
+        //   interval: 1000,
+        //   enabled: true,
+        // },
+        // [Bootstrap.tag]: {
+        //   interval: 60e3,
+        //   enabled: true,
+        //   list,
+        // },
+        [MulticastDNS.tag]: {
           interval: 20e3,
           enabled: true,
         },
       },
-      dht: {
-        enabled: true,
-      },
+      // dht: {
+      //   enabled: true,
+      //   randomWalk: {
+      //     enabled: true,
+      //   },
+      // },
     },
   };
 
