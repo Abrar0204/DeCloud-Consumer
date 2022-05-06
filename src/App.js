@@ -15,7 +15,7 @@ import {
 import Network from "./screens/Network";
 
 function App() {
-  const { accountNumber, connectToMetaMask, isOpen } = useFile();
+  const { accountNumber, connectToMetaMask, isOpen, isOpenData } = useFile();
 
   return (
     <div className="App">
@@ -35,10 +35,8 @@ function App() {
       <Modal isOpen={isOpen} isCentered>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Transaction Approval</ModalHeader>
-          <ModalBody>
-            Approve the transaction that appears in your MetaMask App
-          </ModalBody>
+          <ModalHeader>{isOpenData.title}</ModalHeader>
+          <ModalBody>{isOpenData.description}</ModalBody>
           <ModalFooter />
         </ModalContent>
       </Modal>

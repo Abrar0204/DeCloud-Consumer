@@ -139,6 +139,18 @@ const startNode = async (win) => {
   });
 
   ipcMain.on("upload-file", async (_, filesFromDrop) => {
+    let peers = {};
+    for await (let peer of node.peerStore.getPeers()) {
+      let address = "";
+      peer.addresses.forEach((a) => {
+        address = a.multiaddr.toString();
+      });
+      peers[peer.id.toB58String()] = {
+        address,
+      };
+    }
+    console.table(peers);
+
     let filepath;
 
     if (filesFromDrop == null) {

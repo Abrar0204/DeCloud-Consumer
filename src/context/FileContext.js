@@ -10,14 +10,22 @@ import { ethers } from "ethers";
 import DeCloudFiles from "../res/contracts/DeCloudFiles.json";
 import { useToast } from "@chakra-ui/toast";
 import { useDisclosure } from "@chakra-ui/hooks";
-const CONTRACT_ADDRESS = "0x57C3210D05Ef15d30e7d62B413E6D5285Bb3F094";
+const CONTRACT_ADDRESS = "0x864Ae94e9a73E982173E92baF9c300beE90Df04a";
 const wcProvider = new WalletConnectProvider({
   rpc: {
-    1337: "http://192.168.1.28:7545",
+    1337: "HTTP://192.168.43.177:7545",
   },
 });
 const FileContext = createContext();
 
+const sendMoney = {
+  title: "Payment to Storage Providers",
+  description: "Please approve the Payment Transaction in your MetMask App",
+};
+const refundMoney = {
+  title: "File not found. Initiating Witdrawal",
+  description: "Please approve the Withdrawal Transaction in your MetMask App",
+};
 const FileProvider = ({ children }) => {
   const [accountNumber, setAccountNumber] = useState("");
   const [fileContract, setFileContract] = useState(null);
@@ -26,7 +34,10 @@ const FileProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState("false");
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const [isOpenData, setIsOpenData] = useState({
+    title: "",
+    description: "",
+  });
   const connectToMetaMask = async () => {
     try {
       await wcProvider.enable();
@@ -76,6 +87,7 @@ const FileProvider = ({ children }) => {
           ),
         };
         const uploadDateEnoch = Date.now();
+        setIsOpenData(sendMoney);
         onOpen();
         await fileContract?.addFile(
           fileHash,
@@ -172,20 +184,16 @@ const FileProvider = ({ children }) => {
   useEffect(() => {
     window.api.listen("file-not-found", async (_, fileData) => {
       try {
-        toast({
-          title: "File Not Found",
-          description: `Initiating Refund`,
-          status: "warning",
-          duration: 2000,
-          position: "top",
-          isClosable: true,
-        });
+        setIsOpenData(refundMoney);
+        onOpen();
         await getRefund(fileData);
+        onClose();
       } catch (err) {
+        onClose();
         console.log(err);
       }
     });
-  }, [getRefund, toast]);
+  }, [getRefund, toast, onOpen, onClose]);
 
   useEffect(() => {
     window.api.listen("no-nodes-found", (_) => {
@@ -241,6 +249,7 @@ const FileProvider = ({ children }) => {
         accountNumber,
         disconnect,
         isOpen,
+        isOpenData,
       }}
     >
       {children}
@@ -256,6 +265,7 @@ const useFile = () => {
     accountNumber,
     disconnect,
     isOpen,
+    isOpenData,
   } = useContext(FileContext);
 
   return {
@@ -265,6 +275,7 @@ const useFile = () => {
     accountNumber,
     disconnect,
     isOpen,
+    isOpenData,
   };
 };
 
