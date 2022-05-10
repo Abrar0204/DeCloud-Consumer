@@ -10,10 +10,10 @@ import { ethers } from "ethers";
 import DeCloudFiles from "../res/contracts/DeCloudFiles.json";
 import { useToast } from "@chakra-ui/toast";
 import { useDisclosure } from "@chakra-ui/hooks";
-const CONTRACT_ADDRESS = "0x864Ae94e9a73E982173E92baF9c300beE90Df04a";
+const CONTRACT_ADDRESS = "0x9C8E1b9989B3f9eB310d587B1107F74491A20b50";
 const wcProvider = new WalletConnectProvider({
   rpc: {
-    1337: "HTTP://192.168.43.177:7545",
+    1337: "HTTP://192.168.232.238:7545",
   },
 });
 const FileContext = createContext();
@@ -83,7 +83,7 @@ const FileProvider = ({ children }) => {
             // normal
             // ethers.utils.formatEther(fileSize * 1000000)
             // exaggerated
-            ethers.utils.formatEther(fileSize * 1000000000)
+            ethers.utils.formatEther(fileSize * 1000000)
           ),
         };
         const uploadDateEnoch = Date.now();

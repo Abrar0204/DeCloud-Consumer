@@ -51,7 +51,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "copy-contract": "cp ../truffle/build/contracts/DeCloudFiles.json ./src/res/contracts",
+    "copy-contract": "cp ../truffle/build/contracts/DeCloudFiles.json ./src/res/contracts && cp ../truffle/contracts/DeCloudFiles.sol ./src/res/contracts",
     "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon --disable-gpu --disable-software-rasterizer .\"",
     "electron:package:mac": "npm run build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js",
